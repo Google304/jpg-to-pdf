@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JPG to PDF Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #333;
+    }
+    input[type="file"] {
+      margin: 20px 0;
+    }
+    #preview {
+      max-width: 100%;
+      margin: 20px 0;
+      display: none;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:disabled {
+      background-color: #999;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>JPG to PDF Converter</h1>
+
+  <input type="file" accept="image/jpeg" id="upload" />
+  <img id="preview" />
+
+  <button id="convertBtn" disabled>Convert to PDF</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const upload = document.getElementById('upload');
+    const preview = document.getElementById('preview');
+    const convertBtn = document.getElementById('convertBtn');
+
+    upload.addEventListener('change', () => {
+      const file = upload.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          convertBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    convertBtn.addEventListener('click', () => {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      const img = new Image();
+      img.onload = () => {
+        const imgWidth = pdf.internal.pageSize.getWidth();
+        const imgHeight = (img.height * imgWidth) / img.width;
+        pdf.addImage(preview.src, 'JPEG', 0, 0, imgWidth, imgHeight);
+        pdf.save('converted.pdf');
+      };
+      img.src = preview.src;
+    });
+  </script>
+
+</body>
+</html>
